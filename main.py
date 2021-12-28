@@ -22,6 +22,4 @@ client = tweepy.Client(
     access_token_secret = ACCESS_TOKEN_SECRET
 )
 
-client.create_tweet(text="hello world!")
-
-    
+manutd_user_id = "558797310"

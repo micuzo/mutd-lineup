@@ -1,9 +1,9 @@
 import os
 import tweepy
 from dotenv import load_dotenv
-load_dotenv()
+from lineup import get_lineup
 
-# Let's us authenticate bot account with our app
+load_dotenv()
 
 # Our keys
 API_KEY = os.environ.get("API_KEY")
@@ -21,5 +21,10 @@ client = tweepy.Client(
     access_token = ACCESS_TOKEN,
     access_token_secret = ACCESS_TOKEN_SECRET
 )
+
+lineup = get_lineup()
+lineup_txt = '\n'.join(list(map(lambda player: player["name"], get_lineup())))
+client.create_tweet(text=lineup_txt)
+print("Tweet created")
 
 manutd_user_id = "558797310"

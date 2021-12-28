@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Let's us authenticate bot account with our app
+# Authenticates bot account with our app
 
 # Our keys
 API_KEY = os.environ.get("API_KEY")

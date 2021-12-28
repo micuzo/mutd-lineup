@@ -1,7 +1,5 @@
-import os
 import tweepy
-from dotenv import load_dotenv
-from lineup import get_lineup
+import mulbot
 from env import twitter_keys
 
 auth = tweepy.OAuthHandler(twitter_keys["API_KEY"], twitter_keys["API_KEY_SECRET"])
@@ -13,10 +11,3 @@ client = tweepy.Client(
     access_token = twitter_keys["ACCESS_TOKEN"],
     access_token_secret = twitter_keys["ACCESS_TOKEN_SECRET"]
 )
-
-lineup = get_lineup()
-lineup_txt = '\n'.join(list(map(lambda player: player["name"], get_lineup())))
-client.create_tweet(text=lineup_txt)
-print("Tweet created")
-
-manutd_user_id = "558797310"

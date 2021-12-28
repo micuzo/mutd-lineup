@@ -3,10 +3,10 @@ import json
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+from env import api_sport_keys
 load_dotenv()
 
 api_sport_base_url = "v3.football.api-sports.io"
-API_SPORT_KEY = os.environ.get("API_SPORT_KEY")
 
 #ids
 mutd_id = 33
@@ -17,7 +17,7 @@ def make_request():
     conn = http.client.HTTPSConnection(api_sport_base_url)
     headers = {
     'x-rapidapi-host': api_sport_base_url,
-    'x-rapidapi-key': API_SPORT_KEY
+    'x-rapidapi-key': api_sport_keys.API_KEY
     }
     today = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
     conn.request("GET", f"/fixtures/lineups?fixture={str(sample_mutd_game_id)}", headers=headers)

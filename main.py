@@ -2,24 +2,16 @@ import os
 import tweepy
 from dotenv import load_dotenv
 from lineup import get_lineup
+from env import twitter_keys
 
-load_dotenv()
-
-# Our keys
-API_KEY = os.environ.get("API_KEY")
-API_KEY_SECRET = os.environ.get("API_KEY_SECRET")
-ACCESS_TOKEN = os.environ.get("ACCESS_TOKEN")
-ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
-BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
-
-auth = tweepy.OAuthHandler(API_KEY, API_KEY_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+auth = tweepy.OAuthHandler(twitter_keys["API_KEY"], twitter_keys["API_KEY_SECRET"])
+auth.set_access_token(twitter_keys["ACCESS_TOKEN"], twitter_keys["ACCESS_TOKEN_SECRET"])
 client = tweepy.Client(
-    bearer_token = BEARER_TOKEN,
-    consumer_key = API_KEY,
-    consumer_secret = API_KEY_SECRET,
-    access_token = ACCESS_TOKEN,
-    access_token_secret = ACCESS_TOKEN_SECRET
+    bearer_token = twitter_keys["BEARER_TOKEN"],
+    consumer_key = twitter_keys["API_KEY"],
+    consumer_secret = twitter_keys["API_KEY_SECRET"],
+    access_token = twitter_keys["ACCESS_TOKEN"],
+    access_token_secret = twitter_keys["ACCESS_TOKEN_SECRET"]
 )
 
 lineup = get_lineup()

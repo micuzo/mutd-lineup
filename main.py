@@ -11,3 +11,5 @@ client = tweepy.Client(
     access_token = twitter_keys["ACCESS_TOKEN"],
     access_token_secret = twitter_keys["ACCESS_TOKEN_SECRET"]
 )
+
+print(mulbot.test())

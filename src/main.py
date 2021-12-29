@@ -12,4 +12,4 @@ client = tweepy.Client(
     access_token_secret = twitter_keys["ACCESS_TOKEN_SECRET"]
 )
 
-mulbot.create_tweet(client)
+mulbot.main_exec(client)

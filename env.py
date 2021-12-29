@@ -13,3 +13,5 @@ twitter_keys = {
 api_sport_keys = {
     "API_KEY": os.environ.get("API_SPORT_KEY")
 }
+
+is_prod = os.environ.get("ENV") == "PROD"

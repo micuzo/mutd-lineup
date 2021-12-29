@@ -4,14 +4,10 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 from env import api_sport_keys
+from helper import api_sport_ids
 load_dotenv()
 
 api_sport_base_url = "v3.football.api-sports.io"
-
-#ids
-mutd_id = 33
-pl_id = 39
-sample_mutd_game_id = 710741
 
 def make_request(endpoint):
     conn = http.client.HTTPSConnection(api_sport_base_url)
@@ -28,7 +24,7 @@ def make_request(endpoint):
 def get_next_fixture(use_sample = False):
     data = {}
     if not use_sample:
-        data = make_request(f"/fixtures?next=1&team={mutd_id}")
+        data = make_request(f'/fixtures?next=1&team={api_sport_ids["MANUTD"]}&timezone=Europe/London')
         return data[0]
     else:
         data = get_sample_next_fixture()[0]
@@ -38,11 +34,11 @@ def get_next_fixture(use_sample = False):
 def get_lineup(use_sample = False):
     data = {}
     if not use_sample:
-        data = make_request(f"/fixtures/lineups?fixture={str(sample_mutd_game_id)}")
+        data = make_request(f"/fixtures/lineups?fixture={str(api_sport_ids['SAMPLE_FIXTURE'])}")
     else:
         data = get_sample_lineup()
 
-    data = filter(lambda team : team["team"]["id"] == mutd_id, data)
+    data = filter(lambda team : team["team"]["id"] == api_sport_ids['MANUTD'], data)
     data = list(data)[0]
     map_func = lambda player : { "name": player["player"]["name"]}
 

@@ -15,7 +15,7 @@ def create_tweet(client):
 # when lineups are expected to be released
 def get_mutd_tweet(client):
     manutd_user_id = "558797310" if is_prod else "1475931923511980033"
-    tweets = client.get_users_tweets(manutd_user_id, max_results=5,tweet_fields=["created_at"]).data
+    tweets = client.get_users_tweets(manutd_user_id, user_auth=True, max_results=5,tweet_fields=["created_at"]).data
 
     lineup_release_offset = {
         api_sport_ids["PL"]: 60,

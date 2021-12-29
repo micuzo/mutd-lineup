@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from env import api_sport_keys
 from helper import api_sport_ids
+from functools import cmp_to_key
 load_dotenv()
 
 api_sport_base_url = "v3.football.api-sports.io"
@@ -40,20 +41,42 @@ def get_lineup(use_sample = False):
 
     data = filter(lambda team : team["team"]["id"] == api_sport_ids['MANUTD'], data)
     data = list(data)[0]
-    map_func = lambda player : { "name": player["player"]["name"]}
+    map_func = lambda player : { 
+        "name": player["player"]["name"],
+        "grid": player["player"]["grid"],
+        "pos": player["player"]["pos"] 
+    }
 
-    lineup = map(map_func, data["startXI"])
-    return list(lineup)
+    lineup = list(map(map_func, data["startXI"]))
+
+    def compare_func(p1, p2):
+        pos_values = {
+            "G": 0,
+            "D": 1,
+            "M": 2,
+            "F": 3
+        }
+        pos1 = pos_values[p1["pos"]]
+        pos2 = pos_values[p2["pos"]]
+        grid_sum1 = sum(list(map(lambda grid_pos : int(grid_pos), p1["grid"].split(":"))))
+        grid_sum2 = sum(list(map(lambda grid_pos : int(grid_pos), p2["grid"].split(":"))))
+
+        if pos1 == pos2:
+            return grid_sum1 - grid_sum2
+        else:
+            return pos1 - pos2
+        
+    return sorted(lineup, key=cmp_to_key(compare_func))
 
 
 def get_sample_lineup():
-    f = open("sample/lineup.json")
+    f = open("../sample/lineup.json")
     res = json.load(f)["response"]
     f.close()
     return res
 
 def get_sample_next_fixture():
-    f = open("sample/next-fixture.json")
+    f = open("../sample/next-fixture.json")
     res = json.load(f)
     f.close()
     return res

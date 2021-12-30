@@ -1,3 +1,4 @@
+import json
 import pytz
 from datetime import datetime
 
@@ -56,3 +57,19 @@ def max_item(compare_func, items:list):
             m_val = item_val
 
     return m_item
+
+def write_out_json(data=None, keyval=None):
+    if data is None and keyval is not None:
+        data = read_out_json()
+        data[keyval[0]] = keyval[1]
+        
+    f = open('../out.json', 'w')
+    f.write(json.dumps(data))
+    f.close()
+
+def read_out_json(key=''):
+    f = open('../out.json', 'r')
+    data = json.load(f)
+    f.close()
+    res =  data[key] if key != '' else data
+    return res

@@ -1,8 +1,6 @@
 import http.client
 import json
-import os
 from dotenv import load_dotenv
-from datetime import datetime
 from env import api_sport_keys
 from helper import api_sport_ids
 from functools import cmp_to_key
@@ -37,7 +35,6 @@ def make_request(endpoint):
     'x-rapidapi-host': api_sport_base_url,
     'x-rapidapi-key': api_sport_keys["API_KEY"]
     }
-    today = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
     conn.request("GET", endpoint, headers=headers)
     res = conn.getresponse()
     return json.loads(res.read().decode("utf8"))["response"]

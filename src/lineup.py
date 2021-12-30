@@ -10,6 +10,27 @@ load_dotenv()
 
 api_sport_base_url = "v3.football.api-sports.io"
 
+# Write to out.json:
+#   - next fixture
+#   - whether or not we can tweet
+def main_exec():
+    next_fixture = get_next_fixture(True)
+    data = {'can_tweet': True}
+    f = open ('../out.json', 'r')
+    read_data = json.load(f)
+
+    if read_data and read_data['fixture']['fixture']['id'] != next_fixture['fixture']['id']:
+        data['can_tweet'] = True
+    elif read_data:
+        data["can_tweet"] = read_data['can_tweet']
+        
+    data['fixture'] = next_fixture
+    f.close()
+    
+    f = open('../out.json', 'w')
+    f.write(json.dumps(data))
+    f.close()
+
 def make_request(endpoint):
     conn = http.client.HTTPSConnection(api_sport_base_url)
     headers = {

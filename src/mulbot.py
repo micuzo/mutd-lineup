@@ -58,7 +58,12 @@ def main_exec(client):
         lineup_tweet_id = get_lineup_tweet_id(client, release_time)
 
         print("Replying to tweet with lineup...")
-        create_tweet(client, lineup_tweet_id, team_lineup)
+        try:
+            create_tweet(client, lineup_tweet_id, team_lineup)
+        except:
+            print('Tweet could not be created')
+            exit()
+        
         print("Tweet Created!")
 
         if not FORCE_TWEET:

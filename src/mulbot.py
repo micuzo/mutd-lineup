@@ -69,3 +69,8 @@ def main_exec(client):
         if not FORCE_TWEET:
             print('Setting can_tweet to False...')
             write_out_json(keyval=('can_tweet', False))
+    elif data:
+        msg = 'Already tweeted, exiting...' if data and not data['can_tweet'] else 'Passed kick off, probably postponed, exiting...'
+        print(msg)
+    else:
+        print('Error: No data was found in out.json')

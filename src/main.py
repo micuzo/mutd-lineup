@@ -1,8 +1,8 @@
+from env import twitter_keys
 import tweepy
 import mulbot
 import lineup
 import sys
-from env import twitter_keys
 
 auth = tweepy.OAuthHandler(twitter_keys["API_KEY"], twitter_keys["API_KEY_SECRET"])
 auth.set_access_token(twitter_keys["ACCESS_TOKEN"], twitter_keys["ACCESS_TOKEN_SECRET"])

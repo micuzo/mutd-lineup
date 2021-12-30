@@ -1,8 +1,7 @@
 import pytz
 from datetime import datetime, timedelta
-from helper import to_datetime, lineup_release_offset, write_out_json, read_out_json
+from helper import to_datetime, lineup_release_offset, write_out_json, read_out_json, twitter_ids
 from lineup import get_lineup
-from env import is_prod
 from functools import cmp_to_key
 
 #Replies to @ManUTD with the lineup for the game
@@ -16,8 +15,8 @@ def create_tweet(client, lineup_tweet_id, team_lineup):
 # Gets the @ManUtd tweet id with the timestamp that is the closest to
 # when lineups are expected to be released
 def get_lineup_tweet_id(client, release_time):
-    manutd_user_id = "558797310" if is_prod else "1475931923511980033"
-    tweets = client.get_users_tweets(manutd_user_id, user_auth=True, max_results=5,tweet_fields=["created_at"]).data
+    MANUTD_ID = twitter_ids['MANUTD']
+    tweets = client.get_users_tweets(MANUTD_ID, user_auth=True, max_results=5,tweet_fields=["created_at"]).data
 
     def compare_func(tw1, tw2):
         tw1_diff = (release_time - tw1.created_at).total_seconds()
@@ -51,7 +50,7 @@ def main_exec(client):
         write_out_json(keyval=('can_tweet', False))
         
         print("Getting team lineup...")
-        team_lineup = get_lineup(True)
+        team_lineup = get_lineup()
 
         print("Getting tweet with closest timestamp to expected release time...")
         lineup_tweet_id = get_lineup_tweet_id(client, release_time)

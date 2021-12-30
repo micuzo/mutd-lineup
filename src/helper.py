@@ -1,6 +1,12 @@
 import json
 import pytz
 from datetime import datetime
+from env_type import env_type
+
+# CONSTANTS
+twitter_ids = {
+    'MANUTD': '558797310' if env_type['twitter_env'] == 'PROD' else '1475931923511980033'
+}
 
 api_sport_ids = {
     "PL": 39,
@@ -17,6 +23,8 @@ lineup_release_offset = {
     api_sport_ids["FA_CUP"]: 60,
     api_sport_ids["LEAGUE_CUP"]: 60
 }
+
+# FUNCTIONS
 
 # format example: 2021-12-30T20: 15: 00+00: 00
 # should look into datetime.strptime

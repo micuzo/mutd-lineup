@@ -1,7 +1,7 @@
 import http.client
 import json
 from dotenv import load_dotenv
-from env import api_sport_keys
+from env_type import api_sport_keys, env_type
 from helper import api_sport_ids
 from functools import cmp_to_key
 load_dotenv()
@@ -12,7 +12,7 @@ api_sport_base_url = "v3.football.api-sports.io"
 #   - next fixture
 #   - whether or not we can tweet
 def main_exec():
-    next_fixture = get_next_fixture(True)
+    next_fixture = get_next_fixture()
     data = {'can_tweet': True}
     f = open ('../out.json', 'r')
     read_data = json.load(f)
@@ -40,9 +40,9 @@ def make_request(endpoint):
     return json.loads(res.read().decode("utf8"))["response"]
 
 
-def get_next_fixture(use_sample = False):
+def get_next_fixture():
     data = {}
-    if not use_sample:
+    if env_type['api_sport_env'] == 'PROD':
         data = make_request(f'/fixtures?next=1&team={api_sport_ids["MANUTD"]}&timezone=Europe/London')
         return data[0]
     else:
@@ -50,9 +50,9 @@ def get_next_fixture(use_sample = False):
         return data
         
 
-def get_lineup(use_sample = False):
+def get_lineup():
     data = {}
-    if not use_sample:
+    if env_type['api_sport_env'] == 'PROD':
         data = make_request(f"/fixtures/lineups?fixture={str(api_sport_ids['SAMPLE_FIXTURE'])}")
     else:
         data = get_sample_lineup()

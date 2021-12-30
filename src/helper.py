@@ -33,31 +33,6 @@ def to_datetime(timestamp:str):
 
     return datetime(date[0], date[1], date[2], time[0], time[1]).replace(tzinfo=pytz.UTC)
 
-
-def min_item(compare_func, items:list):
-    m_item = items[0]
-    m_val = compare_func(m_item)
-    
-    for item in items:
-        item_val = compare_func(item)
-        if item_val < m_val:
-            m_item = item
-            m_val = item_val
-
-    return m_item
-
-def max_item(compare_func, items:list):
-    m_item = items[0]
-    m_val = compare_func(m_item)
-    
-    for item in items:
-        item_val = compare_func(item)
-        if item_val > m_val:
-            m_item = item
-            m_val = item_val
-
-    return m_item
-
 def write_out_json(data=None, keyval=None):
     if data is None and keyval is not None:
         data = read_out_json()

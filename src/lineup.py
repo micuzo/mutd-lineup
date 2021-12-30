@@ -61,28 +61,23 @@ def get_lineup(use_sample = False):
     data = list(data)[0]
     map_func = lambda player : { 
         "name": player["player"]["name"],
-        "grid": player["player"]["grid"],
-        "pos": player["player"]["pos"] 
+        "grid": player["player"]["grid"]
     }
 
     lineup = list(map(map_func, data["startXI"]))
 
+    # example: Degea would have [1:1], Dalot[2:4]
     def compare_func(p1, p2):
-        pos_values = {
-            "G": 0,
-            "D": 1,
-            "M": 2,
-            "F": 3
-        }
-        pos1 = pos_values[p1["pos"]]
-        pos2 = pos_values[p2["pos"]]
-        grid_sum1 = sum(list(map(lambda grid_pos : int(grid_pos), p1["grid"].split(":"))))
-        grid_sum2 = sum(list(map(lambda grid_pos : int(grid_pos), p2["grid"].split(":"))))
+        grid_i1 = p1['grid'].split(':')[0]
+        grid_i2 = p2['grid'].split(':')[0]
+        
+        grid_j1 = p1['grid'].split(':')[1]
+        grid_j2 = p2['grid'].split(':')[1]
 
-        if pos1 == pos2:
-            return grid_sum1 - grid_sum2
+        if grid_i1 == grid_i2:
+            return int(grid_j1) - int(grid_j2)
         else:
-            return pos1 - pos2
+            return int(grid_i1) - int(grid_i2)
         
     return sorted(lineup, key=cmp_to_key(compare_func))
 

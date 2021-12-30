@@ -1,9 +1,9 @@
 import pytz
-import json
 from datetime import datetime, timedelta
-from helper import min_item, to_datetime, lineup_release_offset, write_out_json, read_out_json
-from lineup import get_lineup, get_next_fixture
+from helper import to_datetime, lineup_release_offset, write_out_json, read_out_json
+from lineup import get_lineup
 from env import is_prod
+from functools import cmp_to_key
 
 #Replies to @ManUTD with the lineup for the game
 def create_tweet(client, lineup_tweet_id, team_lineup):
@@ -11,14 +11,23 @@ def create_tweet(client, lineup_tweet_id, team_lineup):
     lineup_txt = '\n'.join(player_names)
     client.create_tweet(text=lineup_txt, in_reply_to_tweet_id=lineup_tweet_id)
     
+
+
 # Gets the @ManUtd tweet id with the timestamp that is the closest to
 # when lineups are expected to be released
 def get_lineup_tweet_id(client, release_time):
     manutd_user_id = "558797310" if is_prod else "1475931923511980033"
     tweets = client.get_users_tweets(manutd_user_id, user_auth=True, max_results=5,tweet_fields=["created_at"]).data
-    map_func = lambda tw : (release_time - tw.created_at).total_seconds()
-    tweet = min_item(map_func, tweets)
+
+    def compare_func(tw1, tw2):
+        tw1_diff = (release_time - tw1.created_at).total_seconds()
+        tw2_diff = (release_time - tw2.created_at).total_seconds()
+        return abs(tw1_diff) - abs(tw2_diff)
+
+    tweet = min(tweets, key=cmp_to_key(compare_func))
     return tweet.id
+
+
 
 #If we are before release time exit program
 #else if we can tweet and we are before kick off, tweet lineup

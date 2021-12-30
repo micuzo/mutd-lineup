@@ -10,6 +10,13 @@ api_sport_ids = {
     "SAMPLE_FIXTURE": 710741
 }
 
+lineup_release_offset = {
+    api_sport_ids["PL"]: 60,
+    api_sport_ids["UCL"]: 75,
+    api_sport_ids["FA_CUP"]: 60,
+    api_sport_ids["LEAGUE_CUP"]: 60
+}
+
 # format example: 2021-12-30T20: 15: 00+00: 00
 # should look into datetime.strptime
 def to_datetime(timestamp:str):

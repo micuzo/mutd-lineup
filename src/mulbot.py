@@ -1,4 +1,5 @@
 import pytz
+from env import FORCE_TWEET
 from datetime import datetime, timedelta
 from helper import to_datetime, lineup_release_offset, write_out_json, read_out_json, twitter_ids
 from lineup import get_lineup
@@ -41,13 +42,14 @@ def main_exec(client):
 
     release_time = next_fixture_date - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
 
-    if not data or t < release_time:
+    if not data or t < release_time and not FORCE_TWEET:
         msg = "Could not get data from out.json..." if not data else f"Script run before release time: {t} < {release_time}"
         print(msg)
         exit()
     elif data and data['can_tweet'] and t < next_fixture_date:
-        print('Setting can_tweet to False...')
-        write_out_json(keyval=('can_tweet', False))
+        if not FORCE_TWEET:
+            print('Setting can_tweet to False...')
+            write_out_json(keyval=('can_tweet', False))
         
         print("Getting team lineup...")
         team_lineup = get_lineup()

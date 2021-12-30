@@ -18,3 +18,5 @@ env_type = {
    'twitter_env':  os.environ.get('TWITTER_ENV'),
    'api_sport_env': os.environ.get('API_SPORT_ENV')
 }
+
+FORCE_TWEET = os.environ.get('FORCE_TWEET') == 'TRUE'

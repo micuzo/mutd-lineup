@@ -47,12 +47,12 @@ def main_exec(client):
         print(msg)
         exit()
     elif data and data['can_tweet'] and t < next_fixture_date:
-        if not FORCE_TWEET:
-            print('Setting can_tweet to False...')
-            write_out_json(keyval=('can_tweet', False))
-        
         print("Getting team lineup...")
-        team_lineup = get_lineup()
+        team_lineup = get_lineup(next_fixture['fixture']['id'])
+
+        if team_lineup is None:
+            print('No lineup was found, exiting...')
+            exit()
 
         print("Getting tweet with closest timestamp to expected release time...")
         lineup_tweet_id = get_lineup_tweet_id(client, release_time)
@@ -60,3 +60,7 @@ def main_exec(client):
         print("Replying to tweet with lineup...")
         create_tweet(client, lineup_tweet_id, team_lineup)
         print("Tweet Created!")
+
+        if not FORCE_TWEET:
+            print('Setting can_tweet to False...')
+            write_out_json(keyval=('can_tweet', False))

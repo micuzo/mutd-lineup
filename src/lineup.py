@@ -2,7 +2,7 @@ import http.client
 import json
 from dotenv import load_dotenv
 from env import api_sport_keys, env_type
-from helper import api_sport_ids
+from helper import api_sport_ids, write_out_json, read_out_json
 from functools import cmp_to_key
 load_dotenv()
 
@@ -13,21 +13,28 @@ api_sport_base_url = "v3.football.api-sports.io"
 #   - whether or not we can tweet
 def main_exec():
     next_fixture = get_next_fixture()
-    data = {'can_tweet': True}
-    f = open ('../out.json', 'r')
-    read_data = json.load(f)
+
+    if next_fixture is None:
+        print('no fixture was found, writing empty json object...')
+        write_out_json({})
+        return
+
+    new_data = {'can_tweet': True}
+    print('Reading data currently in out.json...')
+    read_data = read_out_json()
 
     if read_data and read_data['fixture']['fixture']['id'] != next_fixture['fixture']['id']:
-        data['can_tweet'] = True
+        print('The next fixture is different to the one currently stored, setting can_tweet to true...')
+        new_data['can_tweet'] = True
     elif read_data:
-        data["can_tweet"] = read_data['can_tweet']
+        print('The next fixture is the same as the one currently stored, keeping same can_tweet value...')
+        new_data["can_tweet"] = read_data['can_tweet']
         
-    data['fixture'] = next_fixture
-    f.close()
-    
-    f = open('../out.json', 'w')
-    f.write(json.dumps(data))
-    f.close()
+    new_data['fixture'] = next_fixture
+    print('Overwriting data in out.json...')
+    write_out_json(new_data)
+
+
 
 def make_request(endpoint):
     conn = http.client.HTTPSConnection(api_sport_base_url)
@@ -44,18 +51,21 @@ def get_next_fixture():
     data = {}
     if env_type['api_sport_env'] == 'PROD':
         data = make_request(f'/fixtures?next=1&team={api_sport_ids["MANUTD"]}&timezone=Europe/London')
-        return data[0]
+        return data[0] if len(data) > 0 else None
     else:
         data = get_sample_next_fixture()[0]
         return data
         
 
-def get_lineup():
+def get_lineup(next_fixture_id):
     data = {}
     if env_type['api_sport_env'] == 'PROD':
-        data = make_request(f"/fixtures/lineups?fixture={str(api_sport_ids['SAMPLE_FIXTURE'])}")
+        data = make_request(f"/fixtures/lineups?fixture={next_fixture_id}")
     else:
         data = get_sample_lineup()
+
+    if len(data) == 0:
+        return None
 
     data = filter(lambda team : team["team"]["id"] == api_sport_ids['MANUTD'], data)
     data = list(data)[0]

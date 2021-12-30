@@ -1,7 +1,7 @@
 import http.client
 import json
 from dotenv import load_dotenv
-from env_type import api_sport_keys, env_type
+from env import api_sport_keys, env_type
 from helper import api_sport_ids
 from functools import cmp_to_key
 load_dotenv()

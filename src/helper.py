@@ -1,7 +1,7 @@
 import json
 import pytz
 from datetime import datetime
-from env_type import env_type
+from env import env_type
 
 # CONSTANTS
 twitter_ids = {

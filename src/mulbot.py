@@ -37,16 +37,16 @@ def main_exec(client):
     
     #next fixture info
     next_fixture = data['fixture']
-    next_fixture_date = to_datetime(next_fixture['fixture']['date'])
+    next_fixture_time = to_datetime(next_fixture['fixture']['date'])
     next_fixture_league_id = next_fixture["league"]["id"]
 
-    release_time = next_fixture_date - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
+    release_time = next_fixture_time - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
 
-    if not data or t < release_time and not FORCE_TWEET:
+    if (not data or t < release_time) and not FORCE_TWEET:
         msg = "Could not get data from out.json..." if not data else f"Script run before release time: {t} < {release_time}"
         print(msg)
         exit()
-    elif data and data['can_tweet'] and t < next_fixture_date:
+    elif data and data['can_tweet'] and t < next_fixture_time:
         print("Getting team lineup...")
         team_lineup = get_lineup(next_fixture['fixture']['id'])
 

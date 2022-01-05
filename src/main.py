@@ -15,19 +15,23 @@ client = tweepy.Client(
     access_token_secret = twitter_keys["ACCESS_TOKEN_SECRET"]
 )
 
+logger = None
+try:
+    args = sys.argv[1:]
+    logger = get_logger()
+    if len(args) == 0 or args[0] == '-mulbot':
+        mulbot.main_exec(client)
+    elif args[0] == '-lineup':
+        lineup.main_exec()
+    elif args[0] == '-h':
+        help_str = '''Options:
+        -lineup   update next_fixture information in out.json
+        -mulbot   check if lineup is out and tweet it'''
+        print(help_str)
+    else:
+        print("Wrong paramters")
 
-args = sys.argv[1:]
-logger = get_logger()
-if len(args) == 0 or args[0] == '-mulbot':
-    mulbot.main_exec(client)
-elif args[0] == '-lineup':
-    lineup.main_exec()
-elif args[0] == '-h':
-    help_str = '''Options:
-    -lineup   update next_fixture information in out.json
-    -mulbot   check if lineup is out and tweet it'''
-    print(help_str)
-else:
-    print("Wrong paramters")
+    logger.info('program exited\n')
 
-logger.info('program exited\n')
+except:
+    logger.exception('Something went wrong: ')

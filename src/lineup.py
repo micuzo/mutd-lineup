@@ -1,9 +1,11 @@
+import pytz
 import http.client
 import json
 from dotenv import load_dotenv
 from env import api_sport_keys, env_type
-from helper import api_sport_ids, write_out_json, read_out_json
+from helper import api_sport_ids, get_logger, get_next_fixture_info, write_out_json, read_out_json
 from functools import cmp_to_key
+from datetime import datetime
 load_dotenv()
 
 api_sport_base_url = "v3.football.api-sports.io"
@@ -14,25 +16,35 @@ api_sport_base_url = "v3.football.api-sports.io"
 def main_exec():
     next_fixture = get_next_fixture()
 
+    logger = get_logger()
+    logger.info('Rading data in out.json')
+    read_data = read_out_json()
+
     if next_fixture is None:
-        print('no fixture was found, writing empty json object...')
+        logger.info('no fixture was found, writing empty json object...')
         write_out_json({})
         return
 
-    new_data = {'can_tweet': True}
-    print('Reading data currently in out.json...')
-    read_data = read_out_json()
+    #Return if we are during a [lineup release - kickoff] window
+    if read_data:
+        next_fixture_info = get_next_fixture_info(read_data)
+        t = datetime.now(tz=pytz.timezone('Europe/London'))
+        if next_fixture_info['lineup_release_time'] < t < next_fixture_info['kick_off']:
+            logger.info('Script was run during lineup release - kickoff window, exiting...')
+            return
 
-    if read_data and read_data['fixture']['fixture']['id'] != next_fixture['fixture']['id']:
-        print('The next fixture is different to the one currently stored, setting can_tweet to true...')
-        new_data['can_tweet'] = True
-    elif read_data:
-        print('The next fixture is the same as the one currently stored, keeping same can_tweet value...')
-        new_data["can_tweet"] = read_data['can_tweet']
-        
-    new_data['fixture'] = next_fixture
-    print('Overwriting data in out.json...')
+    new_data = {
+        'can_tweet': True,
+        'fixture': next_fixture,
+    }
+
+    logger.info('Overwriting data in out.json...')
     write_out_json(new_data)
+
+    #Update sample lineup
+    f = open('../sample/next-fixture.json', 'w')
+    f.write(json.dumps(new_data['fixture']))
+    f.close()
 
 
 
@@ -59,9 +71,12 @@ def get_next_fixture():
 
 def get_lineup(next_fixture_id):
     data = {}
+    logger = get_logger()
     if env_type['api_sport_env'] == 'PROD':
+        logger.info('Getting team lineup from api-sport')
         data = make_request(f"/fixtures/lineups?fixture={next_fixture_id}")
     else:
+        logger.info('Getting team lineup from lineup.json')
         data = get_sample_lineup()
 
     if len(data) == 0:

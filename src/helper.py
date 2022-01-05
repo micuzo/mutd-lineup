@@ -1,6 +1,8 @@
+import logging
 import json
 import pytz
-from datetime import datetime
+import sys
+from datetime import datetime, timedelta
 from env import env_type
 
 # CONSTANTS
@@ -23,6 +25,7 @@ lineup_release_offset = {
     api_sport_ids["FA_CUP"]: 60,
     api_sport_ids["LEAGUE_CUP"]: 60
 }
+
 
 # FUNCTIONS
 
@@ -56,3 +59,49 @@ def read_out_json(key=''):
     f.close()
     res =  data[key] if key != '' else data
     return res
+
+
+def get_next_fixture_info(data):
+    next_fixture = data['fixture']
+    next_fixture_kickoff = to_datetime(next_fixture['fixture']['date'])
+    next_fixture_league_id = next_fixture["league"]["id"]
+    release_time = next_fixture_kickoff - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
+    
+    return {
+        'id': next_fixture['fixture']['id'],
+        'kick_off': next_fixture_kickoff,
+        'league_id': next_fixture_league_id,
+        'lineup_release_time': release_time
+    }
+
+loggers = set()
+def get_logger():
+    args = sys.argv[1:]
+    name = 'main-logger'
+    if len(args) == 0 or args[0] == '-mulbot':
+        name = 'mulbot'
+    elif args[0] == '-lineup':
+        name = 'lineup'
+    else:
+        exit()
+
+    logger = logging.getLogger(name)
+    if name in loggers:
+        return logger
+    else:
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s %(message)s')
+
+        file_handler = logging.FileHandler(f'../{name}.log')
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(formatter)
+
+        file_handler_debug = logging.FileHandler(f'../{name}-debug.log')
+        file_handler_debug.setLevel(logging.DEBUG)
+        file_handler_debug.setFormatter(formatter)
+        
+        logger.addHandler(file_handler)
+        logger.addHandler(file_handler_debug)
+        loggers.add(name)
+    
+    return logger

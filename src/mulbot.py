@@ -1,21 +1,24 @@
 import pytz
 from env import FORCE_TWEET
-from datetime import datetime, timedelta
-from helper import to_datetime, lineup_release_offset, write_out_json, read_out_json, twitter_ids
+from datetime import datetime
+from helper import get_logger, get_next_fixture_info, write_out_json, read_out_json, twitter_ids
 from lineup import get_lineup
 from functools import cmp_to_key
 
 #Replies to @ManUTD with the lineup for the game
 def create_tweet(client, lineup_tweet_id, team_lineup):
+    logger = get_logger()
     player_names = list(map(lambda player : player["name"], team_lineup))
     lineup_txt = '\n'.join(player_names)
     client.create_tweet(text=lineup_txt, in_reply_to_tweet_id=lineup_tweet_id)
-    
+    logger.info(f'Replied to tweet {lineup_tweet_id} with lineup')
+
 
 
 # Gets the @ManUtd tweet id with the timestamp that is the closest to
 # when lineups are expected to be released
 def get_lineup_tweet_id(client, release_time):
+    logger = get_logger()
     MANUTD_ID = twitter_ids['MANUTD']
     tweets = client.get_users_tweets(MANUTD_ID, user_auth=True, max_results=5,tweet_fields=["created_at"]).data
 
@@ -25,6 +28,7 @@ def get_lineup_tweet_id(client, release_time):
         return abs(tw1_diff) - abs(tw2_diff)
 
     tweet = min(tweets, key=cmp_to_key(compare_func))
+    logger.info(f'Choosing tweet [{tweet.created_at}] - {tweet.id}: {tweet.text}')
     return tweet.id
 
 
@@ -32,45 +36,39 @@ def get_lineup_tweet_id(client, release_time):
 #If we are before release time exit program
 #else if we can tweet and we are before kick off, tweet lineup
 def main_exec(client):
-    t = datetime.now(tz=pytz.timezone('Europe/London'))
     data = read_out_json()
+    logger = get_logger()
+
+    if not data or not data['can_tweet']:
+        if not data: logger.warning('Did not find out.json')
+        elif not data['can_tweet']: logger.debug('Already tweeted, cannot tweet')
+        return
     
-    #next fixture info
-    next_fixture = data['fixture']
-    next_fixture_time = to_datetime(next_fixture['fixture']['date'])
-    next_fixture_league_id = next_fixture["league"]["id"]
-
-    release_time = next_fixture_time - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
-
-    if (not data or t < release_time) and not FORCE_TWEET:
-        msg = "Could not get data from out.json..." if not data else f"Script run before release time: {t} < {release_time}"
-        print(msg)
-        exit()
-    elif data and data['can_tweet'] and t < next_fixture_time:
-        print("Getting team lineup...")
-        team_lineup = get_lineup(next_fixture['fixture']['id'])
+    next_fixture_info = get_next_fixture_info(data)
+    t = datetime.now(tz=pytz.timezone('Europe/London'))
+    
+    #Tweet if we should
+    if t < next_fixture_info['lineup_release_time'] and not FORCE_TWEET:
+        logger.debug(f"Script run before release time: {t} < {next_fixture_info['lineup_release_time']}")
+        return
+    
+    elif t < next_fixture_info['kick_off'] or FORCE_TWEET:
+        team_lineup = get_lineup(next_fixture_info['id'])
 
         if team_lineup is None:
-            print('No lineup was found, exiting...')
-            exit()
+            logger.info(f'No lineup was found')
+            return
 
-        print("Getting tweet with closest timestamp to expected release time...")
-        lineup_tweet_id = get_lineup_tweet_id(client, release_time)
+        lineup_tweet_id = get_lineup_tweet_id(client, next_fixture_info['lineup_release_time'])
 
-        print("Replying to tweet with lineup...")
         try:
             create_tweet(client, lineup_tweet_id, team_lineup)
         except:
-            print('Tweet could not be created')
-            exit()
+            logger.exception('Tweet could not be created')
+            return
         
-        print("Tweet Created!")
-
-        if not FORCE_TWEET:
-            print('Setting can_tweet to False...')
-            write_out_json(keyval=('can_tweet', False))
-    elif data:
-        msg = 'Already tweeted, exiting...' if data and not data['can_tweet'] else 'Passed kick off, probably postponed, exiting...'
-        print(msg)
-    else:
-        print('Error: No data was found in out.json')
+        logger.info('Setting can_tweet to False...')
+        write_out_json(keyval=('can_tweet', False))
+    
+    elif t > next_fixture_info['kick_off']:
+        logger.info('Passed kick off, probably postponed, exiting')

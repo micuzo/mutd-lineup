@@ -31,7 +31,7 @@ try:
     else:
         print("Wrong paramters")
 
-    logger.info('program exited\n')
+    logger.debug('program exited\n')
 
 except:
     logger.exception('Something went wrong: ')

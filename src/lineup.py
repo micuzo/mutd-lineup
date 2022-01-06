@@ -14,11 +14,13 @@ api_sport_base_url = "v3.football.api-sports.io"
 #   - next fixture
 #   - whether or not we can tweet
 def main_exec():
-    next_fixture = get_next_fixture()
-
     logger = get_logger()
-    logger.info('Rading data in out.json')
+    
+    logger.info('Reading data in out.json')
     read_data = read_out_json()
+
+    logger.info('Getting next fixture')
+    next_fixture = get_next_fixture()
 
     if next_fixture is None:
         logger.info('no fixture was found, writing empty json object...')

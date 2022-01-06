@@ -35,6 +35,7 @@ def get_lineup_tweet_id(client, release_time):
 
 #If we are before release time exit program
 #else if we can tweet and we are before kick off, tweet lineup
+#else if we still haven't tweeted and it is after kick off, game is postponed
 def main_exec(client):
     data = read_out_json()
     logger = get_logger()
@@ -68,7 +69,9 @@ def main_exec(client):
             return
         
         logger.info('Setting can_tweet to False...')
-        write_out_json(keyval=('can_tweet', False))
+
+        if not FORCE_TWEET:
+            write_out_json(keyval=('can_tweet', False))
     
-    elif t > next_fixture_info['kick_off']:
-        logger.info('Passed kick off, probably postponed, exiting')
+    elif t > next_fixture_info['kick_off']: #this case happens if we are passed kickoff and can_tweet is still true
+        logger.debug('Passed kick off, probably postponed, exiting')

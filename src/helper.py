@@ -31,7 +31,7 @@ lineup_release_offset = {
 
 # format example: 2021-12-30T20: 15: 00+00: 00
 # should look into datetime.strptime
-def to_datetime(timestamp:str):
+def api_sport_date_to_datetime(timestamp:str):
     dt = timestamp.replace(' ', '')
     date = dt.split('T')[0]
     time = dt.split('T')[1]
@@ -63,7 +63,7 @@ def read_out_json(key=''):
 
 def get_next_fixture_info(data):
     next_fixture = data['fixture']
-    next_fixture_kickoff = to_datetime(next_fixture['fixture']['date'])
+    next_fixture_kickoff = api_sport_date_to_datetime(next_fixture['fixture']['date'])
     next_fixture_league_id = next_fixture["league"]["id"]
     release_time = next_fixture_kickoff - timedelta(minutes=lineup_release_offset[next_fixture_league_id] - 5)
     
